@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 from collections import deque
 import tensorflow as tf
 from dqn_agent import DQNAgent
@@ -8,7 +8,7 @@ import random
 # setting seeds for result reproducibility. This is not super important
 random.seed(2212)
 np.random.seed(2212)
-tf.set_random_seed(2212)
+tf.random.set_seed(2212)
 
 # Hyperparameters / Constants
 EPISODES = 10_000
@@ -27,14 +27,17 @@ env = gym.make(ENV_NAME)
 action_dim = env.action_space.n
 observation_dim = env.observation_space.shape
 
-# creating own session to use across all the Keras/Tensorflow models we are using
-sess = tf.Session()
+# # creating own session to use across all the Keras/Tensorflow models we are using
+# sess = tf.Session()
 
 # Replay memory to store experiances of the model with the environment
 replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
 
 # Our models to solve the mountaincar problem.
-agent = DQNAgent(sess, action_dim, observation_dim)
+agent = DQNAgent(
+    # sess, 
+    action_dim, observation_dim
+)
 
 
 def train_dqn_agent():
@@ -66,7 +69,7 @@ def train_dqn_agent():
 
 max_reward = -999999
 for episode in range(EPISODES):
-    cur_state = env.reset()
+    cur_state, _ = env.reset()
     done = False
     episode_reward = 0
     episode_length = 0
@@ -83,7 +86,8 @@ for episode in range(EPISODES):
             # Take action that maximizes the total reward
             action = np.argmax(agent.model.predict(np.expand_dims(cur_state, axis=0))[0])
 
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, terminated, truncated, _ = env.step(action)
+        done = terminated or truncated
 
         episode_reward += reward
 
@@ -92,7 +96,8 @@ for episode in range(EPISODES):
             reward = 250 + episode_reward
             # save the model if we are getting maximum score this time
             if(episode_reward > max_reward):
-                agent.model.save_weights(str(episode_reward)+"_agent_.h5")
+                # agent.model.save_weights(str(episode_reward)+"_agent_.h5")
+                agent.model.save_weights(str(episode_reward)+"_agent.weights.h5")
         else:
             # In oher cases reward will be proportional to the distance that car has travelled 
             # from it's previous location + velocity of the car

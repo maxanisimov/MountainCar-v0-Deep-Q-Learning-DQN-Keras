@@ -5,13 +5,17 @@ from tensorflow.keras import Model
 from tensorflow.keras.optimizers import Adam
 
 # setting seeds for result reproducibility. This is not super important
-tf.set_random_seed(2212)
+tf.random.set_seed(2212)
 
 class DQNAgent:
-    def __init__(self, sess, action_dim, observation_dim):
+    def __init__(
+            self, 
+            # sess, 
+            action_dim, observation_dim
+        ):
         # Force keras to use the session that we have created
-        K.set_session(sess)
-        self.sess = sess
+        # K.set_session(sess)
+        # self.sess = sess
         self.action_dim = action_dim
         self.observation_dim = observation_dim
         self.model = self.create_model()
